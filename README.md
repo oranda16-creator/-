@@ -1,2 +1,1724 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>作業訂正小怪獸樂園</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F2F6EA;
+    --bg-card:#FFFFFF;
+    --ink:#2B2640;
+    --ink-soft:#726C82;
+    --gold:#F0A93B;
+    --coral:#E8637A;
+    --green:#4E9B6F;
+    --sky:#4C86C6;
+    --line:#E1E6D6;
+    --radius-sm:10px;
+    --radius-lg:22px;
+    --shadow:0 6px 18px rgba(43,38,64,0.08);
+    --accent:#F0A93B;
+    --accent-soft:#FCE9C9;
+  }
+  body.mode-teacher{
+    --bg:#EEF2F6;
+    --accent:#4C86C6;
+    --accent-soft:#DCE8F5;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Noto Sans TC',sans-serif;
+    min-height:100vh;
+    transition:background .3s ease;
+  }
+  .num{font-family:'Baloo 2','Noto Sans TC',sans-serif;}
+  header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    padding:18px 24px;
+    flex-wrap:wrap;
+  }
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand .logo{font-size:30px;}
+  .brand h1{font-size:20px;margin:0;font-weight:900;letter-spacing:.5px;}
+  .brand p{margin:0;font-size:12px;color:var(--ink-soft);}
+  .roletoggle{
+    display:flex;background:#fff;border-radius:999px;padding:4px;box-shadow:var(--shadow);
+  }
+  .roletoggle button{
+    border:none;background:transparent;padding:9px 18px;border-radius:999px;
+    font-family:inherit;font-size:14px;font-weight:700;color:var(--ink-soft);cursor:pointer;
+    transition:all .2s ease;
+  }
+  .roletoggle button.active{background:var(--accent);color:#fff;}
+  main{max-width:1080px;margin:0 auto;padding:0 20px 60px;}
+  .hidden{display:none !important;}
+ 
+  /* ---- Cards / shared components ---- */
+  .card{
+    background:var(--bg-card);border-radius:var(--radius-lg);box-shadow:var(--shadow);
+    padding:22px;margin-bottom:18px;
+  }
+  .card h2{margin:0 0 14px;font-size:17px;font-weight:900;}
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+  label{font-size:13px;color:var(--ink-soft);font-weight:500;}
+  select,input[type=text],input[type=number],input[type=date]{
+    font-family:inherit;font-size:14px;padding:9px 12px;border-radius:var(--radius-sm);
+    border:1.5px solid var(--line);background:#fff;color:var(--ink);
+  }
+  select:focus,input:focus{outline:2px solid var(--accent);outline-offset:1px;}
+  button.btn{
+    font-family:inherit;font-weight:700;font-size:14px;border:none;border-radius:999px;
+    padding:10px 20px;cursor:pointer;background:var(--accent);color:#fff;transition:transform .15s ease, filter .15s ease;
+  }
+  button.btn:hover{filter:brightness(1.06);}
+  button.btn:active{transform:scale(.97);}
+  button.btn.secondary{background:var(--accent-soft);color:var(--ink);}
+  button.btn.ghost{background:transparent;color:var(--ink-soft);border:1.5px solid var(--line);}
+  button.btn.small{padding:6px 14px;font-size:12.5px;}
+  button.btn.danger{background:#F6DCE0;color:#B2415A;}
+  .pill{
+    display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:999px;
+    font-size:12px;font-weight:700;
+  }
+  .pill.green{background:#E1F1E6;color:var(--green);}
+  .pill.gold{background:var(--accent-soft);color:#95661B;}
+  .pill.coral{background:#FBE3E7;color:#B23A52;}
+  .pill.grey{background:#EDEDF1;color:var(--ink-soft);}
+  .empty{
+    text-align:center;color:var(--ink-soft);padding:26px 10px;font-size:14px;
+  }
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);}
+  th{color:var(--ink-soft);font-weight:700;font-size:12.5px;}
+  tr:last-child td{border-bottom:none;}
+  .tablewrap{overflow-x:auto;}
+ 
+  /* ---- Student view ---- */
+  .monster-hero{
+    display:flex;align-items:center;gap:26px;flex-wrap:wrap;justify-content:center;
+    padding:10px 6px 6px;position:relative;
+  }
+  .monster-stage{width:150px;height:150px;flex-shrink:0;position:relative;}
+  .monster-info{flex:1;min-width:200px;}
+  .monster-info .stagename{font-size:19px;font-weight:900;margin:0 0 4px;}
+  .monster-info .pts{font-size:14px;color:var(--ink-soft);margin:0 0 10px;}
+  .progress-track{height:14px;border-radius:999px;background:#EDEFE3;overflow:hidden;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--green));border-radius:999px;transition:width .5s ease;}
+  .progress-label{font-size:11.5px;color:var(--ink-soft);margin-top:5px;}
+  @keyframes bounceFeed{
+    0%{transform:scale(1) rotate(0);}
+    30%{transform:scale(1.18) rotate(-4deg);}
+    55%{transform:scale(.94) rotate(3deg);}
+    100%{transform:scale(1) rotate(0);}
+  }
+  .monster-stage.feeding svg{animation:bounceFeed .6s ease;}
+  .float-pts{
+    position:absolute;top:-6px;left:50%;transform:translateX(-50%);
+    font-weight:800;font-size:16px;color:var(--green);opacity:0;pointer-events:none;
+  }
+  @keyframes floatUp{
+    0%{opacity:0;transform:translate(-50%,10px);}
+    20%{opacity:1;}
+    100%{opacity:0;transform:translate(-50%,-46px);}
+  }
+  .float-pts.show{animation:floatUp 1.1s ease forwards;}
+ 
+  .section-title{font-size:15px;font-weight:900;margin:26px 0 12px;display:flex;align-items:center;gap:8px;}
+  .cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;}
+  .hw-card{
+    background:#fff;border-radius:var(--radius-lg);padding:16px 16px 14px;box-shadow:var(--shadow);
+    border-top:5px solid var(--line);
+  }
+  .hw-card.due-ok{border-top-color:var(--green);}
+  .hw-card.due-soon{border-top-color:var(--gold);}
+  .hw-card.due-late{border-top-color:var(--coral);}
+  .hw-card .cat{font-size:11.5px;color:var(--ink-soft);font-weight:700;}
+  .hw-card .title{font-size:15.5px;font-weight:900;margin:3px 0 8px;}
+  .hw-card .meta{font-size:12.5px;color:var(--ink-soft);margin-bottom:3px;}
+  .hw-card .deadline{font-weight:800;font-size:13px;margin:8px 0 10px;}
+  .hw-card .deadline.ok{color:var(--green);}
+  .hw-card .deadline.soon{color:#B4790F;}
+  .hw-card .deadline.late{color:var(--coral);}
+  .hw-card button{width:100%;}
+ 
+  /* ---- Teacher subnav ---- */
+  .subnav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+  .subnav button{
+    font-family:inherit;border:none;background:#fff;padding:9px 16px;border-radius:999px;
+    font-size:13.5px;font-weight:700;color:var(--ink-soft);cursor:pointer;box-shadow:var(--shadow);
+  }
+  .subnav button.active{background:var(--accent);color:#fff;}
+  .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:14px;}
+  .field{display:flex;flex-direction:column;gap:5px;}
+  .inline-actions{display:flex;gap:8px;justify-content:flex-end;}
+  .tag-list{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;}
+  .tag-chip{
+    background:var(--accent-soft);color:var(--ink);padding:5px 12px;border-radius:999px;font-size:12.5px;
+    display:flex;align-items:center;gap:6px;font-weight:700;
+  }
+  .tag-chip button{border:none;background:transparent;color:var(--ink-soft);cursor:pointer;font-size:13px;padding:0;}
+  .score-input{width:64px;}
+  .muted{color:var(--ink-soft);font-size:12.5px;}
+  .footer-note{text-align:center;color:var(--ink-soft);font-size:12px;margin-top:20px;}
+  .refresh-btn{
+    border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font-size:13px;
+    font-weight:700;color:var(--ink-soft);cursor:pointer;
+  }
+  .settings-help{font-size:12px;color:var(--ink-soft);margin-top:-6px;margin-bottom:10px;}
+  .hungry-note{color:var(--coral);font-weight:800;font-size:13px;margin:2px 0 8px;}
+  .trophy-row{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .trophy-label{font-size:12.5px;font-weight:700;color:var(--ink-soft);}
+  .trophy-icons{display:inline-flex;gap:4px;flex-wrap:wrap;align-items:center;}
+  .trophy-icon{width:26px;height:26px;}
+  .trophy-more{font-size:12px;font-weight:800;color:var(--ink-soft);}
+ 
+  /* ---- Class wall ---- */
+  .wall-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:16px;}
+  .wall-card{
+    background:#fff;border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:16px 10px 14px;
+    text-align:center;cursor:pointer;transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .wall-card:hover{transform:translateY(-4px);box-shadow:0 10px 22px rgba(43,38,64,0.14);}
+  .wall-card:active{transform:translateY(-1px) scale(.98);}
+  .wall-card.hungry-card{background:#FBF3E9;}
+  .wall-monster{width:110px;height:110px;margin:0 auto 8px;}
+  .wall-name{font-weight:900;font-size:15px;}
+  .wall-stage{font-size:12px;color:var(--ink-soft);margin:2px 0 4px;}
+  .wall-pts{font-weight:800;color:#B4790F;font-size:13.5px;}
+  .wall-hungry{margin-top:6px;font-size:12px;font-weight:800;color:var(--coral);}
+  .wall-pending{margin-top:6px;font-size:12px;font-weight:800;color:#B4790F;}
+ 
+  /* ---- backup tab ---- */
+  .backup-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+ 
+  /* ---- assignment category drill-down ---- */
+  .cat-btn{
+    border:none;background:#fff;padding:8px 16px;border-radius:999px;font-family:inherit;
+    font-size:13px;font-weight:700;color:var(--ink-soft);cursor:pointer;box-shadow:var(--shadow);
+    display:inline-flex;align-items:center;gap:6px;
+  }
+  .cat-btn.active{background:var(--accent);color:#fff;}
+  .cat-btn .cat-count{background:rgba(0,0,0,.08);border-radius:999px;padding:1px 7px;font-size:11px;}
+  .cat-btn.active .cat-count{background:rgba(255,255,255,.28);}
+  .status-group{margin-bottom:16px;}
+  .status-group:last-child{margin-bottom:0;}
+  .status-group-title{font-weight:900;font-size:14px;margin-bottom:8px;}
+  .status-group.ungraded .status-group-title{color:#B4790F;}
+  .status-group.graded .status-group-title{color:var(--green);}
+  .status-table-wrap{border-radius:14px;padding:6px 12px;}
+  .status-table-wrap.ungraded{background:#FDF3E4;}
+  .status-table-wrap.graded{background:#EAF5EE;}
+  .status-table-wrap table{width:100%;}
+ 
+  /* ---- correction board (quick tap grey/orange/green tracker) ---- */
+  .board-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:10px;}
+  .board-btn{
+    border:none;border-radius:14px;padding:12px 6px;text-align:center;font-weight:800;font-size:13px;
+    color:#fff;cursor:pointer;transition:transform .12s ease,filter .12s ease;font-family:inherit;
+  }
+  .board-btn:hover{filter:brightness(1.05);}
+  .board-btn:active{transform:scale(.95);}
+  .board-btn.grey{background:#9CA3AF;}
+  .board-btn.orange{background:var(--gold);}
+  .board-btn.green{background:var(--green);}
+  .board-btn.locked{cursor:default;opacity:.9;}
+  .board-btn .board-sub{display:block;font-size:11px;font-weight:600;opacity:.9;margin-top:3px;}
+ 
+  /* ---- custom modal (replaces native confirm/alert, which some embedded/sandboxed views block) ---- */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(43,38,64,0.45);display:flex;align-items:center;justify-content:center;
+    z-index:9999;padding:20px;
+  }
+  .modal-overlay.hidden{display:none;}
+  .modal-box{
+    background:#fff;border-radius:18px;padding:22px;max-width:380px;width:100%;
+    box-shadow:0 16px 40px rgba(0,0,0,.3);
+  }
+  .modal-box p{margin:0 0 18px;font-size:14px;line-height:1.6;white-space:pre-wrap;color:var(--ink);}
+  .modal-actions{display:flex;justify-content:flex-end;gap:10px;}
+  @media (max-width:600px){
+    header{padding:14px 14px;}
+    main{padding:0 12px 40px;}
+    .monster-hero{flex-direction:column;text-align:center;}
+  }
+</style>
+</head>
+<body>
+ 
+<header>
+  <div class="brand">
+    <div class="logo">🐣</div>
+    <div>
+      <h1>作業訂正小怪獸樂園</h1>
+      <p id="brandSub">訂正完成，餵飽你的怪獸！</p>
+    </div>
+  </div>
+  <div class="row">
+    <button class="refresh-btn" id="refreshBtn" title="重新整理資料">🔄 重新整理</button>
+    <div class="roletoggle">
+      <button id="btnRoleStudent" class="active">👦 學生</button>
+      <button id="btnRoleTeacher">🧑‍🏫 老師</button>
+    </div>
+  </div>
+</header>
+ 
+<main>
+ 
+  <!-- ============ STUDENT VIEW (merged wall + detail) ============ -->
+  <section id="studentView">
+ 
+    <!-- 子畫面 A：全班小怪獸牆（預設畫面，也可投影） -->
+    <div id="studentGridState">
+      <div class="card" style="text-align:center;">
+        <h2 style="font-size:22px;">🏫 全班小怪獸牆</h2>
+        <p class="muted">點你自己的小怪獸，就可以去完成作業訂正囉！超過 4 天沒訂正會肚子餓喔。</p>
+      </div>
+      <div class="wall-grid" id="studentWallGrid"></div>
+      <div class="empty hidden" id="studentWallEmpty">還沒有學生名單，請老師先到「老師模式 → 學生管理」新增。</div>
+    </div>
+ 
+    <!-- 子畫面 B：個人訂正畫面 -->
+    <div id="studentDetailState" class="hidden">
+      <button class="btn ghost small" id="backToWallBtn" type="button">⬅ 返回小怪獸牆</button>
+ 
+      <div class="card" id="monsterCard" style="margin-top:12px;">
+        <div class="monster-hero">
+          <div class="monster-stage" id="monsterStageBox">
+            <span class="float-pts" id="floatPts"></span>
+          </div>
+          <div class="monster-info">
+            <p class="stagename" id="stageName">尚未選擇小朋友</p>
+            <p class="pts">目前 <span class="num" id="ptsNow">0</span> 點</p>
+            <p class="hungry-note hidden" id="hungryNote">🍖 肚子餓了！趕快完成訂正餵食牠吧</p>
+            <div class="progress-track"><div class="progress-fill" id="progFill" style="width:0%"></div></div>
+            <p class="progress-label" id="progLabel"></p>
+            <button class="btn secondary small hidden" id="redeemBtn" type="button">🎁 兌換禮物（重新從蛋開始長大）</button>
+          </div>
+        </div>
+        <div id="trophyRow" class="trophy-row hidden">
+          <span class="trophy-label">🏆 已收集的傳說怪獸：</span>
+          <span id="trophyIcons" class="trophy-icons"></span>
+        </div>
+      </div>
+ 
+      <div id="studentLists">
+        <div class="section-title">📌 待訂正</div>
+        <div class="cards-grid" id="pendingGrid"></div>
+        <div id="pendingEmpty" class="empty hidden">目前沒有需要訂正的作業，太棒了！</div>
+ 
+        <div class="section-title">✅ 已完成 / 不需訂正</div>
+        <div class="cards-grid" id="doneGrid"></div>
+        <div id="doneEmpty" class="empty hidden">還沒有完成紀錄。</div>
+      </div>
+    </div>
+  </section>
+ 
+  <!-- ============ TEACHER VIEW ============ -->
+  <section id="teacherView" class="hidden">
+    <div class="subnav">
+      <button data-tab="roster" class="active">👥 學生管理</button>
+      <button data-tab="publish">📢 發布與批改</button>
+      <button data-tab="progress">⏱ 訂正進度</button>
+      <button data-tab="grades">🏆 成績總表</button>
+      <button data-tab="settings">⚙️ 計分設定</button>
+      <button data-tab="backup">💾 資料備份</button>
+    </div>
+ 
+    <!-- 學生管理 -->
+    <div class="teacher-tab" id="tab-roster">
+      <div class="card">
+        <h2>批量新增學生</h2>
+        <p class="muted">一行輸入一位學生姓名，也可以用逗號分隔，按下方按鈕一次全部新增。</p>
+        <textarea id="newStudentNames" rows="5" style="width:100%;font-family:inherit;font-size:14px;border-radius:10px;border:1.5px solid var(--line);padding:10px;" placeholder="例如：&#10;王小明&#10;陳小美&#10;林小華"></textarea>
+        <div class="inline-actions"><button class="btn" id="addStudentBtn" type="button">➕ 批量新增</button></div>
+      </div>
+      <div class="card">
+        <div class="row" style="justify-content:space-between;">
+          <h2 style="margin:0;">目前班級名單</h2>
+          <button class="btn danger small" id="removeAllStudentsBtn" type="button">🗑️ 一鍵重置（移除全部學生、作業與成績）</button>
+        </div>
+        <div class="tablewrap">
+          <table id="rosterTable"><thead><tr><th>姓名</th><th>怪獸點數</th><th>額外加分</th><th></th></tr></thead><tbody></tbody></table>
+        </div>
+        <div class="empty hidden" id="rosterEmpty">目前還沒有學生，先新增一位吧！</div>
+      </div>
+      <div class="card">
+        <h2>作業分類</h2>
+        <div class="row">
+          <input type="text" id="newCategoryName" placeholder="例如：數學、國語、英文">
+          <button class="btn secondary" id="addCategoryBtn">新增分類</button>
+        </div>
+        <div class="tag-list" id="categoryTags"></div>
+      </div>
+    </div>
+ 
+    <!-- 發布作業 -->
+    <div class="teacher-tab hidden" id="tab-publish">
+      <div class="card">
+        <h2>發布新作業</h2>
+        <div class="form-grid">
+          <div class="field">
+            <label>作業名稱</label>
+            <input type="text" id="assignTitle" placeholder="例如：第三課生字練習">
+          </div>
+          <div class="field">
+            <label>分類</label>
+            <select id="assignCategory"></select>
+          </div>
+          <div class="field">
+            <label>發布日期</label>
+            <input type="date" id="assignPublishDate">
+          </div>
+        </div>
+        <div class="inline-actions"><button class="btn" id="publishBtn">發布作業</button></div>
+      </div>
+      <div class="card">
+        <h2>已發布的作業</h2>
+        <p class="muted">先選分類，再點作業名稱直接選到下面的「批改登記」。</p>
+        <div class="row" id="assignCategoryButtons" style="margin-bottom:14px;"></div>
+        <div id="assignCategoryPanel"></div>
+        <div class="empty hidden" id="assignEmpty">還沒有發布任何作業。</div>
+      </div>
+ 
+      <!-- 批改登記 -->
+      <div class="card">
+        <h2>批改登記</h2>
+        <p class="muted">先選分類，再從下面選單挑作業。</p>
+        <div class="row" id="gradingCategoryButtons" style="margin-bottom:10px;"></div>
+        <div class="row">
+          <label style="align-self:center;">選擇作業：</label>
+          <select id="gradingAssignSelect" style="min-width:220px;"></select>
+        </div>
+      </div>
+      <div class="card" id="gradingCard">
+        <h2 id="gradingTitle">請先選擇作業</h2>
+        <div class="row" style="margin-bottom:10px;">
+          <button class="btn secondary small" id="checkAllNeedCorrect" type="button">✅ 全班都勾選需要訂正</button>
+          <button class="btn ghost small" id="uncheckAllNeedCorrect" type="button">取消全選</button>
+        </div>
+        <div class="tablewrap">
+          <table id="gradingTable"><thead><tr><th>學生</th><th>原始成績</th><th>需要訂正？</th></tr></thead><tbody></tbody></table>
+        </div>
+        <p class="muted" id="gradingHint"></p>
+        <div class="row" style="margin-top:8px;">
+          <div class="field">
+            <label id="gradedDateLabel">批改完成日期</label>
+            <input type="date" id="gradedDateInput">
+          </div>
+          <div class="field">
+            <label>開始扣分日期（訂正期限）</label>
+            <input type="date" id="deadlineDateInput">
+          </div>
+          <div class="field" style="justify-content:flex-end;">
+            <label>&nbsp;</label>
+            <button class="btn ghost small" id="resetDeadlineBtn" type="button">改回自動計算（批改日 + 期限天數）</button>
+          </div>
+        </div>
+        <div class="inline-actions">
+          <button class="btn secondary" id="saveGradesBtn">儲存成績</button>
+          <button class="btn" id="finishGradingBtn">✔️ 登記批改完成日期（開始訂正倒數）</button>
+        </div>
+      </div>
+ 
+      <!-- 訂正看板：快速點按切換狀態 -->
+      <div class="card">
+        <h2>訂正看板（點一下切換狀態）</h2>
+        <p class="muted">跟上面選的是同一份作業，適合改完考卷/作業後快速登記：灰色＝未交／未開始 → 點一下變橘色＝待訂正 → 再點一下變綠色＝已完成（同時自動加分餵怪獸）。再點一下綠色可以復原。</p>
+        <div class="board-grid" id="correctionBoardGrid"></div>
+      </div>
+    </div>
+ 
+    <!-- 訂正進度 -->
+    <div class="teacher-tab hidden" id="tab-progress">
+      <div class="card">
+        <h2>訂正進度總覽</h2>
+        <div class="row">
+          <select id="progressAssignSelect" style="min-width:220px;"></select>
+        </div>
+        <div class="tablewrap" style="margin-top:14px;">
+          <table id="progressTable"><thead><tr><th>學生</th><th>原始成績</th><th>批改完成</th><th>訂正期限</th><th>訂正完成</th><th>狀態</th></tr></thead><tbody></tbody></table>
+        </div>
+ 
+        <div class="empty hidden" id="progressEmpty">這份作業還沒有登記批改成績。</div>
+      </div>
+    </div>
+ 
+    <!-- 成績總表 -->
+    <div class="teacher-tab hidden" id="tab-grades">
+      <div class="card">
+        <h2>學期總成績</h2>
+        <p class="muted">總分 = 原始成績 × (1&minus;訂正配分比例) ＋ 訂正時效分 × 訂正配分比例。訂正時效分：準時 100 分，逾期每天扣分，可在「計分設定」調整。</p>
+        <div class="tablewrap">
+          <table id="gradesTable"><thead><tr><th>學生</th><th>作業數</th><th>平均原始成績</th><th>平均訂正時效分</th><th>學期總成績</th></tr></thead><tbody></tbody></table>
+        </div>
+        <div class="empty hidden" id="gradesEmpty">還沒有可計算的成績資料。</div>
+      </div>
+      <div class="card">
+        <h2 id="detailTitle">個別作業明細</h2>
+        <div class="row">
+          <select id="detailStudentSelect" style="min-width:180px;"></select>
+        </div>
+        <div class="tablewrap" style="margin-top:14px;">
+          <table id="detailTable"><thead><tr><th>作業</th><th>分類</th><th>原始成績</th><th>訂正時效分</th><th>該作業總分</th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- 設定 -->
+    <div class="teacher-tab hidden" id="tab-settings">
+      <div class="card">
+        <h2>計分規則設定</h2>
+        <div class="form-grid">
+          <div class="field">
+            <label>訂正期限（天）</label>
+            <input type="number" id="setCorrectionDays" min="1">
+          </div>
+          <div class="field">
+            <label>訂正配分比例（0～1）</label>
+            <input type="number" id="setWeight" min="0" max="1" step="0.05">
+          </div>
+          <div class="field">
+            <label>逾期每天扣分</label>
+            <input type="number" id="setLatePenalty" min="0">
+          </div>
+          <div class="field">
+            <label>逾期扣分上限</label>
+            <input type="number" id="setMaxPenalty" min="0">
+          </div>
+          <div class="field">
+            <label>準時訂正 → 怪獸點數</label>
+            <input type="number" id="setOnTimePts" min="0">
+          </div>
+          <div class="field">
+            <label>逾期訂正 → 怪獸點數</label>
+            <input type="number" id="setLatePts" min="0">
+          </div>
+        </div>
+        <p class="settings-help">例：訂正期限 7 天、每天扣 10 分、上限扣 50 分 → 逾期 5 天以上都只會扣到 50 分（訂正時效分最低 50 分）。</p>
+        <div class="inline-actions"><button class="btn" id="saveSettingsBtn">儲存設定</button></div>
+      </div>
+    </div>
+ 
+    <!-- 資料備份 -->
+    <div class="teacher-tab hidden" id="tab-backup">
+      <div class="card">
+        <h2>匯出資料</h2>
+        <p class="muted">把目前所有學生、作業、成績與設定打包成 JSON，換電腦/換瀏覽器前建議先備份一份。</p>
+        <div class="backup-actions">
+          <button class="btn" id="exportDataBtn" type="button">⬇️ 產生備份內容</button>
+          <button class="btn secondary" id="copyExportBtn" type="button">📋 複製備份內容</button>
+        </div>
+        <p class="muted" style="margin-top:10px;">按「產生備份內容」後，下面會出現整份資料的文字，也會自動嘗試下載成檔案（如果瀏覽器環境不支援自動下載，把下面文字整段複製起來存成 .json 檔也可以）。</p>
+        <textarea id="exportTextarea" readonly rows="8" style="width:100%;font-family:monospace;font-size:12px;border-radius:10px;border:1.5px solid var(--line);padding:10px;" placeholder="按上面「產生備份內容」按鈕，這裡會出現可以複製的備份文字"></textarea>
+      </div>
+      <div class="card">
+        <h2>匯入資料</h2>
+        <p class="muted">選擇之前匯出的 JSON 檔案來還原資料。<strong>注意：匯入會直接覆蓋目前這裡的所有資料</strong>，請先確定已經備份好現有資料。</p>
+        <div class="backup-actions">
+          <input type="file" id="importFileInput" accept="application/json,.json">
+        </div>
+        <p class="muted" style="margin-top:14px;">如果選檔案沒有反應，也可以把備份內容整段貼在下面，再按「從文字匯入」：</p>
+        <textarea id="importTextarea" rows="8" style="width:100%;font-family:monospace;font-size:12px;border-radius:10px;border:1.5px solid var(--line);padding:10px;" placeholder="把備份 JSON 文字貼在這裡"></textarea>
+        <div class="inline-actions"><button class="btn" id="importTextBtn" type="button">⬆️ 從文字匯入</button></div>
+      </div>
+    </div>
+  </section>
+ 
+  <p class="footer-note">資料保存在這台裝置的瀏覽器裡（單機使用）。清除瀏覽器資料或換電腦/換瀏覽器前，記得先到「💾 資料備份」分頁匯出一份 JSON 存起來。</p>
+</main>
+ 
+<div class="modal-overlay hidden" id="modalOverlay">
+  <div class="modal-box">
+    <p id="modalMessage"></p>
+    <div class="modal-actions">
+      <button class="btn ghost small hidden" id="modalCancelBtn" type="button">取消</button>
+      <button class="btn small" id="modalOkBtn" type="button">確定</button>
+    </div>
+  </div>
+</div>
+ 
+<script>
+(function(){
+  "use strict";
+ 
+  // ---------- custom modal (replaces native confirm/alert — some embedded/sandboxed webviews silently block those) ----------
+  function showAlert(message){
+    return new Promise(resolve=>{
+      const overlay = document.getElementById("modalOverlay");
+      const cancelBtn = document.getElementById("modalCancelBtn");
+      const okBtn = document.getElementById("modalOkBtn");
+      document.getElementById("modalMessage").textContent = message;
+      cancelBtn.classList.add("hidden");
+      okBtn.textContent = "好的";
+      overlay.classList.remove("hidden");
+      function cleanup(){ overlay.classList.add("hidden"); okBtn.removeEventListener("click", onOk); }
+      function onOk(){ cleanup(); resolve(true); }
+      okBtn.addEventListener("click", onOk);
+    });
+  }
+  function showConfirm(message){
+    return new Promise(resolve=>{
+      const overlay = document.getElementById("modalOverlay");
+      const cancelBtn = document.getElementById("modalCancelBtn");
+      const okBtn = document.getElementById("modalOkBtn");
+      document.getElementById("modalMessage").textContent = message;
+      cancelBtn.classList.remove("hidden");
+      cancelBtn.textContent = "取消";
+      okBtn.textContent = "確定";
+      overlay.classList.remove("hidden");
+      function cleanup(){
+        overlay.classList.add("hidden");
+        okBtn.removeEventListener("click", onOk);
+        cancelBtn.removeEventListener("click", onCancel);
+      }
+      function onOk(){ cleanup(); resolve(true); }
+      function onCancel(){ cleanup(); resolve(false); }
+      okBtn.addEventListener("click", onOk);
+      cancelBtn.addEventListener("click", onCancel);
+    });
+  }
+ 
+  const STAGE_THRESHOLDS = [0,50,150,300,500,800];
+  const STAGE_NAMES = ["怪獸蛋","幼怪獸","少年怪獸","成年怪獸","進化怪獸","傳說怪獸"];
+  const STAGE_COLORS = ["#D8CBA9","#F0A93B","#E8637A","#4E9B6F","#4C86C6","#9B5DE5"];
+  const HUNGER_DAYS = 4;
+  // 進入最高階段（傳說怪獸）從 800 點開始，但要長到「大」體型（同一階段內的 2/3 處）才算完全長大，可以兌換禮物
+  const LAST_STAGE_LOWER = STAGE_THRESHOLDS[STAGE_THRESHOLDS.length-1];
+  const LAST_STAGE_UPPER = LAST_STAGE_LOWER + 300;
+  const MAX_STAGE_FULL_GROWTH = LAST_STAGE_LOWER + Math.ceil((LAST_STAGE_UPPER-LAST_STAGE_LOWER)*2/3);
+ 
+  const DEFAULT_SETTINGS = {
+    correctionDays:7, correctionWeight:0.2,
+    latePenaltyPerDay:10, maxLatePenalty:50,
+    onTimePts:10, latePts:3
+  };
+ 
+  let state = {
+    roster:{students:[], categories:["國語","數學","英文"]},
+    assignments:[],
+    records:[],
+    settings:Object.assign({}, DEFAULT_SETTINGS),
+  };
+  let currentTeacherTab = "roster";
+  let currentView = "student";
+ 
+  // ---------- storage helpers (single-device use — always local, no shared cloud sync) ----------
+  const LOCAL_PREFIX = "hw_monster_local__";
+  const memoryFallback = {};
+ 
+  function localGet(key){
+    try{
+      const raw = window.localStorage.getItem(LOCAL_PREFIX+key);
+      return raw!==null ? JSON.parse(raw) : undefined;
+    }catch(e){
+      return Object.prototype.hasOwnProperty.call(memoryFallback,key) ? memoryFallback[key] : undefined;
+    }
+  }
+  function localSet(key, value){
+    try{ window.localStorage.setItem(LOCAL_PREFIX+key, JSON.stringify(value)); }
+    catch(e){ memoryFallback[key] = value; }
+  }
+ 
+  async function loadKey(key, fallback){
+    const local = localGet(key);
+    return local!==undefined ? local : fallback;
+  }
+  async function saveKey(key, value){
+    localSet(key, value);
+  }
+ 
+  let lastLoadAllAt = 0;
+  const LOAD_ALL_MIN_INTERVAL = 4000; // avoid hammering storage when several actions fire in quick succession
+ 
+  async function loadAll(force){
+    const now = Date.now();
+    if(!force && (now - lastLoadAllAt) < LOAD_ALL_MIN_INTERVAL) return; // reuse in-memory state, skip network calls
+    lastLoadAllAt = now;
+    state.roster = await loadKey("roster", {students:[], categories:["國語","數學","英文"]}, true);
+    state.assignments = await loadKey("assignments", [], true);
+    state.records = await loadKey("records", [], true);
+    state.settings = Object.assign({}, DEFAULT_SETTINGS, await loadKey("settings", {}, true));
+    let needsMigrationSave = false;
+    (state.roster.students||[]).forEach(s=>{
+      if(!s.lastFedAt){ s.lastFedAt = Date.now(); needsMigrationSave = true; }
+    });
+    if(needsMigrationSave) await saveKey("roster", state.roster, true);
+  }
+ 
+  function isHungry(student){
+    const last = student && student.lastFedAt ? student.lastFedAt : Date.now();
+    return (Date.now() - last) >= HUNGER_DAYS*86400000;
+  }
+ 
+  async function announceIfMaxStageReached(student, oldPoints){
+    const newPoints = student.monsterPoints||0;
+    if(oldPoints < MAX_STAGE_FULL_GROWTH && newPoints >= MAX_STAGE_FULL_GROWTH){
+      await showAlert(`🎉🎉 ${student.name} 的小怪獸完全長大成最大隻的傳說怪獸了！\n到 ${student.name} 自己的畫面就會看到「🎁 兌換禮物」按鈕，可以去領獎勵囉！`);
+    }
+  }
+ 
+  function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+ 
+  // ---------- date helpers ----------
+  function fmt(ts){
+    if(!ts) return "—";
+    const d = new Date(ts);
+    return d.getFullYear()+"/"+(d.getMonth()+1)+"/"+d.getDate()+" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+  }
+  function fmtDateOnly(ts){
+    if(!ts) return "—";
+    const d = new Date(ts);
+    return d.getFullYear()+"/"+(d.getMonth()+1)+"/"+d.getDate();
+  }
+  function dateStrToTs(str){
+    if(!str) return null;
+    const [y,m,d] = str.split("-").map(Number);
+    return new Date(y, m-1, d, 0,0,0,0).getTime();
+  }
+  function tsToDateStr(ts){
+    const d = ts ? new Date(ts) : new Date();
+    const pad = n=>String(n).padStart(2,"0");
+    return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+  }
+  function fmtShort(ts){
+    if(!ts) return "—";
+    const d = new Date(ts);
+    return (d.getMonth()+1)+"/"+d.getDate();
+  }
+  function daysLeftLabel(deadline, now){
+    const diff = deadline - now;
+    const days = Math.ceil(diff/86400000);
+    if(days > 0) return {text:"剩 "+days+" 天", cls:days<=2?"soon":"ok"};
+    if(days === 0) return {text:"今天到期", cls:"soon"};
+    return {text:"已逾期 "+(-days)+" 天", cls:"late"};
+  }
+ 
+  // ---------- scoring ----------
+  function getDeadline(assignment, settings){
+    if(assignment.deadlineOverride) return assignment.deadlineOverride;
+    if(!assignment.gradedAt) return null;
+    return assignment.gradedAt + settings.correctionDays*86400000;
+  }
+  function timelinessScore(assignment, record, settings, now){
+    if(!record.needsCorrection) return 100;
+    if(!assignment.gradedAt) return null;
+    const deadline = getDeadline(assignment, settings);
+    const endTime = record.correctedAt || now;
+    if(endTime <= deadline) return 100;
+    const daysLate = Math.ceil((endTime-deadline)/86400000);
+    return Math.max(100 - daysLate*settings.latePenaltyPerDay, 100-settings.maxLatePenalty);
+  }
+  function combinedScore(assignment, record, settings, now){
+    const t = timelinessScore(assignment, record, settings, now);
+    if(t===null || typeof record.originalScore !== "number") return null;
+    const w = settings.correctionWeight;
+    return record.originalScore*(1-w) + t*w;
+  }
+  function stageInfo(points){
+    points = points||0;
+    let stage = 0;
+    for(let i=0;i<STAGE_THRESHOLDS.length;i++){ if(points>=STAGE_THRESHOLDS[i]) stage=i; }
+    const next = STAGE_THRESHOLDS[stage+1];
+    const lower = STAGE_THRESHOLDS[stage];
+    const upper = next!==undefined ? next : lower+300;
+    const ratio = Math.min(1, Math.max(0, (points-lower)/(upper-lower)));
+    let sizeLabel, sizeScale;
+    if(ratio < 1/3){ sizeLabel="小"; sizeScale=0.68; }
+    else if(ratio < 2/3){ sizeLabel="中"; sizeScale=0.95; }
+    else { sizeLabel="大"; sizeScale=1.28; }
+    return {stage, name:STAGE_NAMES[stage], color:STAGE_COLORS[stage], next, sizeLabel, sizeScale};
+  }
+ 
+  // ---------- monster svg ----------
+  function monsterSVG(stage, color, sizeScale, hungry, sizeLabel){
+    sizeScale = sizeScale || 1;
+    const eyes = hungry
+      ? `<path d="M55 68 Q62 74 69 68" stroke="#2B2640" stroke-width="3" fill="none" stroke-linecap="round"/>
+         <path d="M91 68 Q98 74 105 68" stroke="#2B2640" stroke-width="3" fill="none" stroke-linecap="round"/>`
+      : `<circle cx="62" cy="70" r="9" fill="#fff"/><circle cx="62" cy="70" r="4" fill="#2B2640"/>
+         <circle cx="98" cy="70" r="9" fill="#fff"/><circle cx="98" cy="70" r="4" fill="#2B2640"/>`;
+    let extras = "";
+    if(stage>=1){ extras += `<circle cx="45" cy="105" r="7" fill="${color}" opacity=".55"/><circle cx="115" cy="105" r="7" fill="${color}" opacity=".55"/>`; }
+    if(stage>=2){ extras += `<path d="M55 40 L62 22 L70 40 Z" fill="${color}"/><path d="M90 40 L98 22 L106 40 Z" fill="${color}"/>`; }
+    if(stage>=3){ extras += `<path d="M28 90 Q6 70 22 45 Q34 68 40 90 Z" fill="${color}" opacity=".85"/><path d="M132 90 Q154 70 138 45 Q126 68 120 90 Z" fill="${color}" opacity=".85"/>`; }
+    if(stage>=4){ extras += `<circle cx="80" cy="26" r="6" fill="#FFD86B"/><path d="M80 26 L76 16 L84 16 Z" fill="#FFD86B"/>`; }
+    if(stage>=5){ extras += `<circle cx="40" cy="55" r="3" fill="#fff" opacity=".8"/><circle cx="120" cy="120" r="3" fill="#fff" opacity=".8"/><circle cx="130" cy="55" r="2.4" fill="#fff" opacity=".8"/>`; }
+    // size-based decorative details: bigger body = rosier cheeks + a little sparkle
+    let sizeDecor = "";
+    if(sizeLabel==="中"){
+      sizeDecor = `<ellipse cx="48" cy="88" rx="7" ry="5" fill="#FF9EB3" opacity=".45"/><ellipse cx="112" cy="88" rx="7" ry="5" fill="#FF9EB3" opacity=".45"/>`;
+    } else if(sizeLabel==="大"){
+      sizeDecor = `<ellipse cx="46" cy="88" rx="8" ry="6" fill="#FF9EB3" opacity=".5"/><ellipse cx="114" cy="88" rx="8" ry="6" fill="#FF9EB3" opacity=".5"/>
+        <path d="M80 128 l3 7 l7 2 l-7 3 l-3 7 l-3-7 l-7-3 l7-2 Z" fill="#FFD86B"/>`;
+    }
+    const mouth = hungry
+      ? `<path d="M66 96 Q80 86 94 96" stroke="#2B2640" stroke-width="3.5" fill="none" stroke-linecap="round"/>`
+      : (stage===0 ? `<path d="M68 90 Q80 96 92 90" stroke="#2B2640" stroke-width="3" fill="none" stroke-linecap="round"/>`
+                   : `<path d="M65 90 Q80 105 95 90" stroke="#2B2640" stroke-width="3.5" fill="none" stroke-linecap="round"/>`);
+    const bodyOpacity = hungry ? 0.72 : 1;
+    const hungryMark = hungry ? `<text x="112" y="32" font-size="22">💤</text>` : "";
+    // fully-grown legendary monster (final stage + large size) hugs a little present — signals it's ready to redeem
+    const giftBox = (stage>=STAGE_THRESHOLDS.length-1 && sizeLabel==="大") ? `
+      <g transform="translate(80,122)">
+        <rect x="-15" y="-13" width="30" height="24" rx="3" fill="#E8637A"/>
+        <rect x="-15" y="-3" width="30" height="6" fill="#F0A93B"/>
+        <rect x="-4" y="-13" width="8" height="24" fill="#F0A93B"/>
+        <path d="M-5 -13 Q-13 -23 -2 -19 Q-7 -15 -5 -13 Z" fill="#F0A93B"/>
+        <path d="M5 -13 Q13 -23 2 -19 Q7 -15 5 -13 Z" fill="#F0A93B"/>
+      </g>` : "";
+    return `<svg viewBox="-20 -20 200 200" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+      <g transform="translate(80,95) scale(${sizeScale}) translate(-80,-95)">
+        ${extras}
+        <ellipse cx="80" cy="95" rx="52" ry="46" fill="${color}" opacity="${bodyOpacity}"/>
+        ${sizeDecor}
+        ${eyes}
+        ${mouth}
+        ${hungryMark}
+        ${giftBox}
+      </g>
+    </svg>`;
+  }
+ 
+  // ---------- role/view toggle ----------
+  const btnRoleStudent = document.getElementById("btnRoleStudent");
+  const btnRoleTeacher = document.getElementById("btnRoleTeacher");
+  const studentView = document.getElementById("studentView");
+  const teacherView = document.getElementById("teacherView");
+  const brandSub = document.getElementById("brandSub");
+ 
+  const VIEW_SUBS = {
+    student:"點你自己的小怪獸，就可以完成訂正囉！",
+    teacher:"老師後台：發布作業、登記批改與訂正成績"
+  };
+ 
+  function setActiveView(view){
+    currentView = view;
+    document.body.classList.toggle("mode-teacher", view==="teacher");
+    studentView.classList.toggle("hidden", view!=="student");
+    teacherView.classList.toggle("hidden", view!=="teacher");
+    [btnRoleStudent, btnRoleTeacher].forEach(b=>b.classList.remove("active"));
+    ({student:btnRoleStudent, teacher:btnRoleTeacher})[view].classList.add("active");
+    brandSub.textContent = VIEW_SUBS[view];
+    if(view==="student") showGridState();
+    else renderTeacherAll();
+  }
+ 
+  btnRoleStudent.addEventListener("click", ()=>setActiveView("student"));
+  btnRoleTeacher.addEventListener("click", ()=>setActiveView("teacher"));
+ 
+  document.getElementById("refreshBtn").addEventListener("click", async ()=>{
+    await loadAll(true);
+    if(currentView==="student" && studentSubState==="detail") renderStudentDetail();
+    else renderStudentWallGrid();
+    renderTeacherAll();
+  });
+ 
+  // (auto-refresh removed — class wall now only updates on manual "🔄 重新整理")
+ 
+  // ================= STUDENT VIEW (wall grid + personal detail) =================
+  let selectedStudentId = null;
+  let studentSubState = "grid";
+  const studentGridState = document.getElementById("studentGridState");
+  const studentDetailState = document.getElementById("studentDetailState");
+ 
+  function showGridState(){
+    studentSubState = "grid";
+    studentGridState.classList.remove("hidden");
+    studentDetailState.classList.add("hidden");
+    renderStudentWallGrid();
+  }
+  function showDetailState(studentId){
+    selectedStudentId = studentId;
+    studentSubState = "detail";
+    studentGridState.classList.add("hidden");
+    studentDetailState.classList.remove("hidden");
+    renderStudentDetail();
+  }
+  document.getElementById("backToWallBtn").addEventListener("click", showGridState);
+ 
+  function refreshStudentViews(){
+    if(studentSubState==="detail") renderStudentDetail();
+    else renderStudentWallGrid();
+  }
+ 
+  function renderStudentWallGrid(){
+    const box = document.getElementById("studentWallGrid");
+    const empty = document.getElementById("studentWallEmpty");
+    const students = state.roster.students || [];
+    if(students.length===0){ box.innerHTML=""; empty.classList.remove("hidden"); return; }
+    empty.classList.add("hidden");
+    const now = Date.now();
+    const sorted = [...students].sort((a,b)=> (b.monsterPoints||0)-(a.monsterPoints||0));
+    box.innerHTML = sorted.map(s=>{
+      const info = stageInfo(s.monsterPoints||0);
+      const hungry = isHungry(s);
+      const pendingCount = state.assignments.filter(a=>{
+        const rec = state.records.find(r=>r.assignmentId===a.id && r.studentId===s.id);
+        return rec && a.gradedAt && rec.needsCorrection && !rec.correctedAt;
+      }).length;
+      return `<div class="wall-card ${hungry?"hungry-card":""}" data-select-student="${s.id}">
+        <div class="wall-monster">${monsterSVG(info.stage, info.color, info.sizeScale, hungry, info.sizeLabel)}</div>
+        <div class="wall-name">${escapeHtml(s.name)}</div>
+        <div class="wall-stage">${info.name}・${info.sizeLabel}</div>
+        <div class="wall-pts num">⭐ ${s.monsterPoints||0}</div>
+        ${s.trophyCount>0 ? `<div class="wall-pending" style="color:#B4790F;">🏆 x${s.trophyCount}</div>` : ""}
+        ${hungry ? `<div class="wall-hungry">🍖 肚子餓了</div>` : ""}
+        ${pendingCount>0 ? `<div class="wall-pending">📌 ${pendingCount} 份待訂正</div>` : ""}
+      </div>`;
+    }).join("");
+    box.querySelectorAll("[data-select-student]").forEach(card=>{
+      card.addEventListener("click", ()=>showDetailState(card.getAttribute("data-select-student")));
+    });
+  }
+ 
+  function renderStudentDetail(){
+    const students = state.roster.students || [];
+    const student = students.find(s=>s.id===selectedStudentId);
+    if(!student){ showGridState(); return; }
+    const curId = student.id;
+ 
+    const info = stageInfo(student.monsterPoints||0);
+    const hungry = isHungry(student);
+    const points = student.monsterPoints||0;
+    const isLastStage = info.stage === STAGE_THRESHOLDS.length-1;
+    const isFullyGrown = isLastStage && points >= MAX_STAGE_FULL_GROWTH;
+    document.getElementById("stageName").textContent = info.name + "（" + info.sizeLabel + "）・" + student.name;
+    document.getElementById("ptsNow").textContent = points;
+    document.getElementById("monsterStageBox").innerHTML = monsterSVG(info.stage, info.color, info.sizeScale, hungry, info.sizeLabel) + '<span class="float-pts" id="floatPts"></span>';
+    document.getElementById("hungryNote").classList.toggle("hidden", !hungry);
+    let pct, progText;
+    if(info.next){
+      pct = Math.min(100, Math.round((points-STAGE_THRESHOLDS[info.stage])/(info.next-STAGE_THRESHOLDS[info.stage])*100));
+      progText = `再 ${info.next-points} 點就能進化！`;
+    } else if(!isFullyGrown){
+      pct = Math.min(100, Math.round((points-LAST_STAGE_LOWER)/(MAX_STAGE_FULL_GROWTH-LAST_STAGE_LOWER)*100));
+      progText = `已經是最高等級的傳說怪獸了！再 ${MAX_STAGE_FULL_GROWTH-points} 點就能完全長大，才能兌換禮物！`;
+    } else {
+      pct = 100;
+      progText = "已經完全長大成最大隻的傳說怪獸了！可以兌換禮物囉！";
+    }
+    document.getElementById("progFill").style.width = pct+"%";
+    document.getElementById("progLabel").textContent = progText;
+ 
+    const isMaxStage = isFullyGrown;
+    const redeemBtn = document.getElementById("redeemBtn");
+    redeemBtn.classList.toggle("hidden", !isMaxStage);
+    redeemBtn.onclick = async ()=>{
+      if(!(await showConfirm(`要幫 ${student.name} 的傳說怪獸兌換禮物嗎？兌換後小怪獸會從蛋重新開始長大，但收集紀錄會保留下來喔！`))) return;
+      await loadAll(true);
+      const s2 = state.roster.students.find(x=>x.id===student.id);
+      if(!s2) return;
+      s2.trophyCount = (s2.trophyCount||0) + 1;
+      s2.monsterPoints = 0;
+      s2.lastFedAt = Date.now();
+      await saveKey("roster", state.roster, true);
+      renderStudentDetail();
+      await showAlert(`兌換完成！${student.name} 已經收集了 ${s2.trophyCount} 隻傳說怪獸，新的小怪獸蛋準備出發！`);
+    };
+ 
+    const trophyRow = document.getElementById("trophyRow");
+    const trophyIcons = document.getElementById("trophyIcons");
+    const trophyCount = student.trophyCount||0;
+    if(trophyCount>0){
+      trophyRow.classList.remove("hidden");
+      const maxShow = 10;
+      const shown = Math.min(trophyCount, maxShow);
+      let iconsHtml = "";
+      for(let i=0;i<shown;i++){
+        iconsHtml += `<span class="trophy-icon">${monsterSVG(STAGE_THRESHOLDS.length-1, STAGE_COLORS[STAGE_COLORS.length-1], 1, false, "大")}</span>`;
+      }
+      if(trophyCount>maxShow) iconsHtml += `<span class="trophy-more">+${trophyCount-maxShow}</span>`;
+      trophyIcons.innerHTML = iconsHtml;
+    } else {
+      trophyRow.classList.add("hidden");
+      trophyIcons.innerHTML = "";
+    }
+ 
+    const now = Date.now();
+    const pending = [], done = [];
+    state.assignments.forEach(a=>{
+      const rec = state.records.find(r=>r.assignmentId===a.id && r.studentId===curId);
+      if(!rec || !a.gradedAt) return;
+      if(rec.needsCorrection && !rec.correctedAt){ pending.push({a,rec}); }
+      else { done.push({a,rec}); }
+    });
+    pending.sort((x,y)=> getDeadline(x.a,state.settings) - getDeadline(y.a,state.settings));
+ 
+    const pendingGrid = document.getElementById("pendingGrid");
+    const pendingEmpty = document.getElementById("pendingEmpty");
+    if(pending.length===0){ pendingGrid.innerHTML=""; pendingEmpty.classList.remove("hidden"); }
+    else{
+      pendingEmpty.classList.add("hidden");
+      pendingGrid.innerHTML = pending.map(({a,rec})=>{
+        const deadline = getDeadline(a, state.settings);
+        const dl = daysLeftLabel(deadline, now);
+        return `<div class="hw-card due-${dl.cls==='ok'?'ok':dl.cls==='soon'?'soon':'late'}">
+          <div class="cat">${escapeHtml(a.category||"")}</div>
+          <div class="title">${escapeHtml(a.title)}</div>
+          <div class="meta">原始成績：<span class="num">${rec.originalScore}</span> 分</div>
+          <div class="deadline ${dl.cls}">${dl.text}</div>
+          <button class="btn" data-complete="${a.id}">我訂正完成了！🎉</button>
+        </div>`;
+      }).join("");
+    }
+ 
+    const doneGrid = document.getElementById("doneGrid");
+    const doneEmpty = document.getElementById("doneEmpty");
+    if(done.length===0){ doneGrid.innerHTML=""; doneEmpty.classList.remove("hidden"); }
+    else{
+      doneEmpty.classList.add("hidden");
+      done.sort((x,y)=> (y.rec.correctedAt||y.a.gradedAt) - (x.rec.correctedAt||x.a.gradedAt));
+      doneGrid.innerHTML = done.map(({a,rec})=>{
+        let badge;
+        if(!rec.needsCorrection) badge = `<span class="pill green">滿分不用訂正</span>`;
+        else{
+          const deadline = getDeadline(a, state.settings);
+          badge = rec.correctedAt<=deadline ? `<span class="pill green">準時訂正</span>` : `<span class="pill coral">遲交訂正</span>`;
+        }
+        return `<div class="hw-card due-ok">
+          <div class="cat">${escapeHtml(a.category||"")}</div>
+          <div class="title">${escapeHtml(a.title)}</div>
+          <div class="meta">原始成績：<span class="num">${rec.originalScore}</span> 分</div>
+          <div class="meta">${rec.correctedAt? "訂正完成："+fmtShort(rec.correctedAt) : ""}</div>
+          ${badge}
+        </div>`;
+      }).join("");
+    }
+ 
+    pendingGrid.querySelectorAll("[data-complete]").forEach(btn=>{
+      btn.addEventListener("click", ()=>completeCorrection(btn.getAttribute("data-complete"), curId));
+    });
+  }
+ 
+  async function completeCorrection(assignmentId, studentId){
+    const a = state.assignments.find(x=>x.id===assignmentId);
+    const rec = state.records.find(r=>r.assignmentId===assignmentId && r.studentId===studentId);
+    if(!a || !rec || rec.correctedAt) return;
+    const now = Date.now();
+    rec.correctedAt = now;
+    const deadline = getDeadline(a, state.settings);
+    const onTime = now <= deadline;
+    const pts = onTime ? state.settings.onTimePts : state.settings.latePts;
+    rec.pointsAwarded = pts;
+    const student = state.roster.students.find(s=>s.id===studentId);
+    const oldPoints = student ? (student.monsterPoints||0) : 0;
+    if(student){ student.monsterPoints = (student.monsterPoints||0) + pts; student.lastFedAt = now; }
+    renderStudentDetail();
+    playFeedAnimation(pts);
+    await Promise.all([
+      saveKey("records", state.records, true),
+      saveKey("roster", state.roster, true)
+    ]);
+    if(student) await announceIfMaxStageReached(student, oldPoints);
+  }
+ 
+  function playFeedAnimation(pts){
+    const box = document.getElementById("monsterStageBox");
+    if(!box) return;
+    box.classList.add("feeding");
+    const fp = document.getElementById("floatPts");
+    if(fp){ fp.textContent = "+"+pts; fp.classList.remove("show"); void fp.offsetWidth; fp.classList.add("show"); }
+    setTimeout(()=>box.classList.remove("feeding"), 650);
+  }
+ 
+  function escapeHtml(s){
+    return String(s==null?"":s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  }
+ 
+  // ================= TEACHER VIEW =================
+  document.querySelectorAll(".subnav button").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      document.querySelectorAll(".subnav button").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+      document.querySelectorAll(".teacher-tab").forEach(t=>t.classList.add("hidden"));
+      currentTeacherTab = btn.getAttribute("data-tab");
+      document.getElementById("tab-"+currentTeacherTab).classList.remove("hidden");
+      renderTeacherAll();
+    });
+  });
+ 
+  function renderTeacherAll(){
+    renderRoster();
+    renderCategories();
+    renderPublishTab();
+    renderGradingSelect();
+    renderProgressSelect();
+    renderGradesTab();
+    fillSettingsForm();
+  }
+ 
+  // ---- roster ----
+  document.getElementById("addStudentBtn").addEventListener("click", async ()=>{
+    const input = document.getElementById("newStudentNames");
+    const raw = input.value;
+    const names = raw
+      .split(/[\n,，、]+/)
+      .map(n=>n.trim())
+      .filter(n=>n.length>0);
+    if(names.length===0){ await showAlert("請至少輸入一個學生姓名。"); return; }
+    await loadAll(true);
+    const existingNames = new Set((state.roster.students||[]).map(s=>s.name));
+    const added = [];
+    const skipped = [];
+    names.forEach(name=>{
+      if(existingNames.has(name)){ skipped.push(name); return; }
+      state.roster.students.push({id:uid(), name, monsterPoints:0, lastFedAt:Date.now()});
+      existingNames.add(name);
+      added.push(name);
+    });
+    await saveKey("roster", state.roster, true);
+    input.value = "";
+    renderTeacherAll(); refreshStudentViews();
+    let msg = `已新增 ${added.length} 位學生。`;
+    if(skipped.length>0) msg += `\n以下姓名已存在，未重複新增：${skipped.join("、")}`;
+    await showAlert(msg);
+  });
+ 
+  document.getElementById("removeAllStudentsBtn").addEventListener("click", async ()=>{
+    await loadAll(true);
+    const count = (state.roster.students||[]).length;
+    const assignCount = state.assignments.length;
+    if(count===0 && assignCount===0){ await showAlert("目前名單和作業都是空的。"); return; }
+    if(!(await showConfirm(`確定要一次移除全部 ${count} 位學生、${assignCount} 份作業與所有訂正/成績紀錄嗎？此動作無法復原。`))) return;
+    if(!(await showConfirm("再次確認：真的要把學生、作業、成績全部清空嗎？（分類與計分設定不會被刪除）"))) return;
+    state.roster.students = [];
+    state.assignments = [];
+    state.records = [];
+    await saveKey("roster", state.roster, true);
+    await saveKey("assignments", state.assignments, true);
+    await saveKey("records", state.records, true);
+    selectedAssignCategory = null;
+    renderTeacherAll(); refreshStudentViews();
+  });
+ 
+  function renderRoster(){
+    const tbody = document.querySelector("#rosterTable tbody");
+    const empty = document.getElementById("rosterEmpty");
+    const students = state.roster.students || [];
+    if(students.length===0){ tbody.innerHTML=""; empty.classList.remove("hidden"); return; }
+    empty.classList.add("hidden");
+    tbody.innerHTML = students.map(s=>`<tr>
+      <td>${escapeHtml(s.name)}</td>
+      <td class="num">${s.monsterPoints||0}</td>
+      <td>
+        <div class="row" style="gap:6px;flex-wrap:nowrap;">
+          <input type="number" class="score-input" style="width:64px;" data-bonus-amount="${s.id}" value="5">
+          <button class="btn secondary small" data-bonus-add="${s.id}" type="button">➕ 加分</button>
+        </div>
+      </td>
+      <td><button class="btn danger small" data-del-student="${s.id}">移除</button></td>
+    </tr>`).join("");
+    tbody.querySelectorAll("[data-del-student]").forEach(btn=>{
+      btn.addEventListener("click", async ()=>{
+        if(!(await showConfirm("確定要移除這位學生嗎？（歷史紀錄仍會保留但不再顯示）"))) return;
+        await loadAll();
+        state.roster.students = state.roster.students.filter(s=>s.id!==btn.getAttribute("data-del-student"));
+        await saveKey("roster", state.roster, true);
+        renderTeacherAll(); refreshStudentViews();
+      });
+    });
+    tbody.querySelectorAll("[data-bonus-add]").forEach(btn=>{
+      btn.addEventListener("click", async ()=>{
+        const studentId = btn.getAttribute("data-bonus-add");
+        const amountInput = document.querySelector(`[data-bonus-amount="${studentId}"]`);
+        const amount = parseInt(amountInput ? amountInput.value : "0", 10);
+        if(!amount){ await showAlert("請輸入不是 0 的加分數字。"); return; }
+        const student = state.roster.students.find(s=>s.id===studentId);
+        if(!student) return;
+        const oldPoints = student.monsterPoints||0;
+        student.monsterPoints = oldPoints + amount;
+        student.lastFedAt = Date.now();
+        renderRoster();
+        await saveKey("roster", state.roster, true);
+        await showAlert(`已幫 ${student.name} ${amount>0?"加了":"扣了"} ${Math.abs(amount)} 點！`);
+        await announceIfMaxStageReached(student, oldPoints);
+      });
+    });
+  }
+ 
+  document.getElementById("addCategoryBtn").addEventListener("click", async ()=>{
+    const input = document.getElementById("newCategoryName");
+    const name = input.value.trim();
+    if(!name) return;
+    await loadAll();
+    if(!state.roster.categories.includes(name)) state.roster.categories.push(name);
+    await saveKey("roster", state.roster, true);
+    input.value = "";
+    renderTeacherAll();
+  });
+ 
+  function renderCategories(){
+    const box = document.getElementById("categoryTags");
+    const cats = state.roster.categories || [];
+    box.innerHTML = cats.map(c=>`<span class="tag-chip">${escapeHtml(c)} <button data-del-cat="${escapeHtml(c)}">✕</button></span>`).join("");
+    box.querySelectorAll("[data-del-cat]").forEach(btn=>{
+      btn.addEventListener("click", async ()=>{
+        await loadAll();
+        state.roster.categories = state.roster.categories.filter(c=>c!==btn.getAttribute("data-del-cat"));
+        await saveKey("roster", state.roster, true);
+        renderTeacherAll();
+      });
+    });
+    const sel = document.getElementById("assignCategory");
+    if(sel){
+      const prevValue = sel.value;
+      sel.innerHTML = cats.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
+      if(prevValue && cats.includes(prevValue)) sel.value = prevValue;
+    }
+  }
+ 
+  // ---- publish ----
+  document.getElementById("publishBtn").addEventListener("click", async ()=>{
+    const title = document.getElementById("assignTitle").value.trim();
+    const category = document.getElementById("assignCategory").value;
+    const dateStr = document.getElementById("assignPublishDate").value;
+    if(!title){ await showAlert("請輸入作業名稱"); return; }
+    await loadAll();
+    const publishedAt = dateStr ? dateStrToTs(dateStr) : Date.now();
+    state.assignments.push({id:uid(), title, category, publishedAt, gradedAt:null});
+    await saveKey("assignments", state.assignments, true);
+    document.getElementById("assignTitle").value="";
+    renderTeacherAll();
+  });
+ 
+  let selectedAssignCategory = null;
+ 
+  function renderPublishTab(){
+    const dateInput = document.getElementById("assignPublishDate");
+    if(dateInput && !dateInput.value) dateInput.value = tsToDateStr(Date.now());
+    const empty = document.getElementById("assignEmpty");
+    const catBox = document.getElementById("assignCategoryButtons");
+    const panel = document.getElementById("assignCategoryPanel");
+    const list = state.assignments;
+ 
+    if(list.length===0){
+      catBox.innerHTML = ""; panel.innerHTML = ""; empty.classList.remove("hidden");
+      return;
+    }
+    empty.classList.add("hidden");
+ 
+    const usedCats = new Set(list.map(a=>a.category||"未分類"));
+    let cats = (state.roster.categories||[]).filter(c=>usedCats.has(c));
+    usedCats.forEach(c=>{ if(!cats.includes(c)) cats.push(c); });
+    if(!selectedAssignCategory || !cats.includes(selectedAssignCategory)) selectedAssignCategory = cats[0];
+ 
+    catBox.innerHTML = cats.map(c=>{
+      const count = list.filter(a=>(a.category||"未分類")===c).length;
+      const active = c===selectedAssignCategory ? "active" : "";
+      return `<button class="cat-btn ${active}" type="button" data-cat="${escapeHtml(c)}">${escapeHtml(c)} <span class="cat-count">${count}</span></button>`;
+    }).join("");
+    catBox.querySelectorAll("[data-cat]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        selectedAssignCategory = btn.getAttribute("data-cat");
+        renderPublishTab();
+      });
+    });
+ 
+    const filtered = [...list].filter(a=>(a.category||"未分類")===selectedAssignCategory).sort((a,b)=>b.publishedAt-a.publishedAt);
+    const ungraded = filtered.filter(a=>!a.gradedAt);
+    const graded = filtered.filter(a=>a.gradedAt);
+ 
+    function rowsHtml(arr){
+      return arr.map(a=>`<tr>
+        <td><a href="#" class="select-for-grading" data-select-grade="${a.id}" style="color:var(--ink);font-weight:700;text-decoration:none;border-bottom:1.5px dashed var(--line);">${escapeHtml(a.title)}</a></td>
+        <td><input type="date" class="pub-date-edit" data-pubdate="${a.id}" value="${tsToDateStr(a.publishedAt)}"></td>
+        <td>${a.gradedAt ? fmtDateOnly(a.gradedAt) : "—"}</td>
+        <td><button class="btn danger small" data-del-assign="${a.id}">刪除</button></td>
+      </tr>`).join("");
+    }
+ 
+    panel.innerHTML = `
+      <div class="status-group ungraded">
+        <div class="status-group-title">🟡 未批改（${ungraded.length}）</div>
+        <div class="status-table-wrap ungraded">
+          ${ungraded.length ? `<table><thead><tr><th>作業</th><th>發布日期</th><th>批改日期</th><th></th></tr></thead><tbody>${rowsHtml(ungraded)}</tbody></table>` : `<p class="muted" style="margin:6px 0;">這個分類目前沒有未批改的作業。</p>`}
+        </div>
+      </div>
+      <div class="status-group graded">
+        <div class="status-group-title">🟢 已批改（${graded.length}）</div>
+        <div class="status-table-wrap graded">
+          ${graded.length ? `<table><thead><tr><th>作業</th><th>發布日期</th><th>批改日期</th><th></th></tr></thead><tbody>${rowsHtml(graded)}</tbody></table>` : `<p class="muted" style="margin:6px 0;">這個分類目前還沒有已批改的作業。</p>`}
+        </div>
+      </div>
+    `;
+ 
+    panel.querySelectorAll("[data-select-grade]").forEach(link=>{
+      link.addEventListener("click", (e)=>{
+        e.preventDefault();
+        const assignId = link.getAttribute("data-select-grade");
+        const targetAssign = state.assignments.find(x=>x.id===assignId);
+        if(targetAssign) selectedGradingCategory = targetAssign.category||"未分類";
+        renderGradingSelect();
+        gradingAssignSelect.value = assignId;
+        renderGradingTable();
+        document.getElementById("gradingCard").scrollIntoView({behavior:"smooth", block:"start"});
+      });
+    });
+    panel.querySelectorAll("[data-pubdate]").forEach(input=>{
+      input.addEventListener("change", async ()=>{
+        await loadAll();
+        const a2 = state.assignments.find(x=>x.id===input.getAttribute("data-pubdate"));
+        if(a2 && input.value){ a2.publishedAt = dateStrToTs(input.value); await saveKey("assignments", state.assignments, true); renderTeacherAll(); }
+      });
+    });
+    panel.querySelectorAll("[data-del-assign]").forEach(btn=>{
+      btn.addEventListener("click", async ()=>{
+        if(!(await showConfirm("確定要刪除這份作業與相關紀錄嗎？"))) return;
+        await loadAll();
+        const id = btn.getAttribute("data-del-assign");
+        state.assignments = state.assignments.filter(a=>a.id!==id);
+        state.records = state.records.filter(r=>r.assignmentId!==id);
+        await saveKey("assignments", state.assignments, true);
+        await saveKey("records", state.records, true);
+        renderTeacherAll();
+      });
+    });
+  }
+ 
+  // ---- grading ----
+  const gradingAssignSelect = document.getElementById("gradingAssignSelect");
+  gradingAssignSelect.addEventListener("change", renderGradingTable);
+  let selectedGradingCategory = null;
+ 
+  document.getElementById("checkAllNeedCorrect").addEventListener("click", ()=>{
+    document.querySelectorAll("#gradingTable [data-needcorrect]").forEach(cb=>cb.checked=true);
+  });
+  document.getElementById("uncheckAllNeedCorrect").addEventListener("click", ()=>{
+    document.querySelectorAll("#gradingTable [data-needcorrect]").forEach(cb=>cb.checked=false);
+  });
+ 
+  function renderGradingCategoryButtons(){
+    const box = document.getElementById("gradingCategoryButtons");
+    const list = state.assignments;
+    if(list.length===0){ box.innerHTML = ""; return; }
+    const usedCats = new Set(list.map(a=>a.category||"未分類"));
+    let cats = (state.roster.categories||[]).filter(c=>usedCats.has(c));
+    usedCats.forEach(c=>{ if(!cats.includes(c)) cats.push(c); });
+    if(!selectedGradingCategory || !cats.includes(selectedGradingCategory)) selectedGradingCategory = cats[0];
+    box.innerHTML = cats.map(c=>{
+      const count = list.filter(a=>(a.category||"未分類")===c).length;
+      const active = c===selectedGradingCategory ? "active" : "";
+      return `<button class="cat-btn ${active}" type="button" data-grading-cat="${escapeHtml(c)}">${escapeHtml(c)} <span class="cat-count">${count}</span></button>`;
+    }).join("");
+    box.querySelectorAll("[data-grading-cat]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        selectedGradingCategory = btn.getAttribute("data-grading-cat");
+        renderGradingSelect();
+      });
+    });
+  }
+ 
+  function renderGradingSelect(){
+    renderGradingCategoryButtons();
+    const list = [...state.assignments]
+      .filter(a=>(a.category||"未分類")===selectedGradingCategory)
+      .sort((a,b)=>b.publishedAt-a.publishedAt);
+    const cur = gradingAssignSelect.value;
+    gradingAssignSelect.innerHTML = list.map(a=>`<option value="${a.id}">${a.gradedAt?"✅ ":""}${escapeHtml(a.title)}</option>`).join("");
+    if(list.find(a=>a.id===cur)) gradingAssignSelect.value = cur;
+    else if(list.length>0) gradingAssignSelect.value = list[0].id;
+    renderGradingTable();
+  }
+ 
+  function renderGradingTable(){
+    const id = gradingAssignSelect.value;
+    const a = state.assignments.find(x=>x.id===id);
+    const tbody = document.querySelector("#gradingTable tbody");
+    const title = document.getElementById("gradingTitle");
+    const hint = document.getElementById("gradingHint");
+    const gradedDateInput = document.getElementById("gradedDateInput");
+    const deadlineDateInput = document.getElementById("deadlineDateInput");
+    const finishBtn = document.getElementById("finishGradingBtn");
+    if(!a){ tbody.innerHTML=""; title.textContent="請先發布作業"; hint.textContent=""; renderCorrectionBoard(); return; }
+    title.textContent = "登記：[" + (a.category||"未分類") + "] " + a.title;
+    gradedDateInput.value = tsToDateStr(a.gradedAt || Date.now());
+    const effectiveDeadline = getDeadline(a, state.settings) || (dateStrToTs(gradedDateInput.value) + state.settings.correctionDays*86400000);
+    deadlineDateInput.value = tsToDateStr(effectiveDeadline);
+    if(a.gradedAt){
+      const autoText = a.deadlineOverride ? "（已手動調整，非自動計算）" : "（自動計算：批改日 + "+state.settings.correctionDays+" 天）";
+      hint.textContent = "已於 "+fmtDateOnly(a.gradedAt)+" 完成批改，目前開始扣分日期為 "+fmtDateOnly(effectiveDeadline)+autoText;
+      finishBtn.textContent = "🔁 更新批改完成日期（重新計算訂正期限）";
+    } else {
+      hint.textContent = "尚未完成批改登記，學生不會看到這份作業需要訂正。";
+      finishBtn.textContent = "✔️ 登記批改完成日期（開始訂正倒數）";
+    }
+    const students = state.roster.students||[];
+    tbody.innerHTML = students.map(s=>{
+      const rec = state.records.find(r=>r.assignmentId===a.id && r.studentId===s.id) || {};
+      return `<tr>
+        <td>${escapeHtml(s.name)}</td>
+        <td><input type="number" class="score-input" min="0" max="100" data-score="${s.id}" value="${rec.originalScore??""}"></td>
+        <td><input type="checkbox" data-needcorrect="${s.id}" ${rec.needsCorrection?"checked":""}></td>
+      </tr>`;
+    }).join("");
+    renderCorrectionBoard();
+  }
+ 
+  // ---- correction board: quick grey(未交)→orange(待訂正)→green(已完成) tap tracker ----
+  function classifyBoardState(rec){
+    if(!rec) return {cls:"grey", label:"未交", locked:false};
+    if(rec.correctedAt) return {cls:"green", label:"已完成", locked:false};
+    if(rec.needsCorrection) return {cls:"orange", label:"待訂正", locked:false};
+    if(typeof rec.originalScore === "number") return {cls:"green", label:"已完成", locked:true}; // graded with full marks via the detailed table — no correction needed
+    return {cls:"grey", label:"未交", locked:false};
+  }
+ 
+  function renderCorrectionBoard(){
+    const grid = document.getElementById("correctionBoardGrid");
+    if(!grid) return;
+    const id = gradingAssignSelect.value;
+    const a = state.assignments.find(x=>x.id===id);
+    if(!a){ grid.innerHTML = `<p class="muted" style="margin:0;">請先選擇作業。</p>`; return; }
+    const students = state.roster.students||[];
+    if(students.length===0){ grid.innerHTML = `<p class="muted" style="margin:0;">目前還沒有學生名單。</p>`; return; }
+    grid.innerHTML = students.map(s=>{
+      const rec = state.records.find(r=>r.assignmentId===a.id && r.studentId===s.id);
+      const st = classifyBoardState(rec);
+      return `<button class="board-btn ${st.cls} ${st.locked?"locked":""}" type="button" ${st.locked?"":`data-board-student="${s.id}"`}>${escapeHtml(s.name)}<span class="board-sub">(${st.label})</span></button>`;
+    }).join("");
+    grid.querySelectorAll("[data-board-student]").forEach(btn=>{
+      btn.addEventListener("click", ()=>cycleBoardStatus(a.id, btn.getAttribute("data-board-student")));
+    });
+  }
+ 
+  async function cycleBoardStatus(assignmentId, studentId){
+    const a = state.assignments.find(x=>x.id===assignmentId);
+    if(!a) return;
+    let rec = state.records.find(r=>r.assignmentId===assignmentId && r.studentId===studentId);
+    if(!rec){ rec = {assignmentId, studentId, originalScore:null, needsCorrection:false, correctedAt:null}; state.records.push(rec); }
+    const student = state.roster.students.find(s=>s.id===studentId);
+    const oldPoints = student ? (student.monsterPoints||0) : 0;
+ 
+    let needAssignmentSave=false, needRosterSave=false;
+ 
+    if(!rec.correctedAt && !rec.needsCorrection){
+      // grey -> orange：標記需要訂正
+      rec.needsCorrection = true;
+      if(!a.gradedAt){ a.gradedAt = Date.now(); needAssignmentSave = true; } // 第一次在看板上標記時，順便開始訂正倒數
+    } else if(rec.needsCorrection && !rec.correctedAt){
+      // orange -> green：完成訂正，加分餵怪獸
+      const now = Date.now();
+      rec.correctedAt = now;
+      const deadline = getDeadline(a, state.settings);
+      const onTime = now <= deadline;
+      const pts = onTime ? state.settings.onTimePts : state.settings.latePts;
+      rec.pointsAwarded = pts;
+      if(student){ student.monsterPoints = (student.monsterPoints||0) + pts; student.lastFedAt = now; needRosterSave = true; }
+    } else if(rec.correctedAt){
+      // green -> grey：復原（誤按修正用）
+      if(student && rec.pointsAwarded){ student.monsterPoints = Math.max(0, (student.monsterPoints||0) - rec.pointsAwarded); needRosterSave = true; }
+      rec.correctedAt = null;
+      rec.needsCorrection = false;
+      rec.pointsAwarded = 0;
+    }
+ 
+    // optimistic UI update first so taps feel instant, then save in the background
+    renderCorrectionBoard();
+    renderRoster();
+ 
+    const savePromises = [saveKey("records", state.records, true)];
+    if(needAssignmentSave) savePromises.push(saveKey("assignments", state.assignments, true));
+    if(needRosterSave) savePromises.push(saveKey("roster", state.roster, true));
+    await Promise.all(savePromises);
+ 
+    if(student) await announceIfMaxStageReached(student, oldPoints);
+  }
+ 
+  document.getElementById("saveGradesBtn").addEventListener("click", async ()=>{
+    await doSaveGrades(false);
+  });
+  document.getElementById("finishGradingBtn").addEventListener("click", async ()=>{
+    await doSaveGrades(true);
+  });
+ 
+  async function doSaveGrades(markGraded){
+    const id = gradingAssignSelect.value;
+    if(!id) return;
+    await loadAll();
+    const a = state.assignments.find(x=>x.id===id);
+    if(!a) return;
+    const students = state.roster.students||[];
+    students.forEach(s=>{
+      const scoreInput = document.querySelector(`[data-score="${s.id}"]`);
+      const checkInput = document.querySelector(`[data-needcorrect="${s.id}"]`);
+      if(!scoreInput) return;
+      const scoreVal = scoreInput.value === "" ? null : Number(scoreInput.value);
+      let rec = state.records.find(r=>r.assignmentId===id && r.studentId===s.id);
+      if(!rec){ rec = {assignmentId:id, studentId:s.id, originalScore:null, needsCorrection:false, correctedAt:null}; state.records.push(rec); }
+      rec.originalScore = scoreVal;
+      rec.needsCorrection = checkInput ? checkInput.checked : false;
+    });
+    if(markGraded){
+      const dateStr = document.getElementById("gradedDateInput").value;
+      a.gradedAt = dateStr ? dateStrToTs(dateStr) : Date.now();
+    }
+    const deadlineStr = document.getElementById("deadlineDateInput").value;
+    const autoDeadline = a.gradedAt ? (a.gradedAt + state.settings.correctionDays*86400000) : null;
+    const chosenDeadline = deadlineStr ? dateStrToTs(deadlineStr) : null;
+    a.deadlineOverride = (chosenDeadline && chosenDeadline !== autoDeadline) ? chosenDeadline : null;
+    await saveKey("assignments", state.assignments, true);
+    await saveKey("records", state.records, true);
+    renderTeacherAll();
+    await showAlert(markGraded ? "已登記批改完成日期，訂正倒數開始！" : "成績已儲存。");
+  }
+ 
+  document.getElementById("resetDeadlineBtn").addEventListener("click", async ()=>{
+    const id = gradingAssignSelect.value;
+    if(!id) return;
+    await loadAll();
+    const a = state.assignments.find(x=>x.id===id);
+    if(!a) return;
+    a.deadlineOverride = null;
+    await saveKey("assignments", state.assignments, true);
+    renderTeacherAll();
+  });
+ 
+  // ---- progress ----
+  const progressAssignSelect = document.getElementById("progressAssignSelect");
+  progressAssignSelect.addEventListener("change", renderProgressTable);
+ 
+  function renderProgressSelect(){
+    const list = [...state.assignments].sort((a,b)=>b.publishedAt-a.publishedAt);
+    const cur = progressAssignSelect.value;
+    progressAssignSelect.innerHTML = list.map(a=>`<option value="${a.id}">[${escapeHtml(a.category||"未分類")}] ${escapeHtml(a.title)}</option>`).join("");
+    if(list.find(a=>a.id===cur)) progressAssignSelect.value = cur;
+    renderProgressTable();
+  }
+ 
+  function renderProgressTable(){
+    const id = progressAssignSelect.value;
+    const a = state.assignments.find(x=>x.id===id);
+    const tbody = document.querySelector("#progressTable tbody");
+    const empty = document.getElementById("progressEmpty");
+    if(!a || !a.gradedAt){ tbody.innerHTML=""; empty.classList.remove("hidden"); return; }
+    empty.classList.add("hidden");
+    const now = Date.now();
+    const deadline = getDeadline(a, state.settings);
+    const students = state.roster.students||[];
+    tbody.innerHTML = students.map(s=>{
+      const rec = state.records.find(r=>r.assignmentId===id && r.studentId===s.id);
+      if(!rec) return "";
+      let status;
+      if(!rec.needsCorrection) status = `<span class="pill green">不需訂正</span>`;
+      else if(rec.correctedAt && rec.correctedAt<=deadline) status = `<span class="pill green">準時完成</span>`;
+      else if(rec.correctedAt && rec.correctedAt>deadline) status = `<span class="pill coral">遲交完成</span>`;
+      else if(now>deadline) status = `<span class="pill coral">已逾期未訂正</span>`;
+      else status = `<span class="pill gold">訂正中</span>`;
+      return `<tr>
+        <td>${escapeHtml(s.name)}</td>
+        <td class="num">${rec.originalScore??"—"}</td>
+        <td>${fmtDateOnly(a.gradedAt)}</td>
+        <td>${fmtDateOnly(deadline)}</td>
+        <td>${rec.correctedAt? fmt(rec.correctedAt) : "—"}</td>
+        <td>${status}</td>
+      </tr>`;
+    }).join("");
+  }
+ 
+  // ---- grades tab ----
+  function renderGradesTab(){
+    const tbody = document.querySelector("#gradesTable tbody");
+    const empty = document.getElementById("gradesEmpty");
+    const students = state.roster.students||[];
+    const now = Date.now();
+    if(students.length===0){ tbody.innerHTML=""; empty.classList.remove("hidden"); return; }
+    let anyData = false;
+    const rows = students.map(s=>{
+      let origSum=0, origN=0, tSum=0, tN=0, combSum=0, combN=0;
+      state.assignments.forEach(a=>{
+        const rec = state.records.find(r=>r.assignmentId===a.id && r.studentId===s.id);
+        if(!rec || typeof rec.originalScore !== "number") return;
+        origSum += rec.originalScore; origN++;
+        const t = timelinessScore(a, rec, state.settings, now);
+        if(t!==null){ tSum+=t; tN++; }
+        const c = combinedScore(a, rec, state.settings, now);
+        if(c!==null){ combSum+=c; combN++; }
+      });
+      if(origN>0) anyData = true;
+      return {name:s.name, count:origN,
+        avgOrig: origN? (origSum/origN).toFixed(1):"—",
+        avgT: tN? (tSum/tN).toFixed(1):"—",
+        total: combN? (combSum/combN).toFixed(1):"—"};
+    });
+    if(!anyData){ tbody.innerHTML=""; empty.classList.remove("hidden"); return; }
+    empty.classList.add("hidden");
+    tbody.innerHTML = rows.map(r=>`<tr>
+      <td>${escapeHtml(r.name)}</td>
+      <td class="num">${r.count}</td>
+      <td class="num">${r.avgOrig}</td>
+      <td class="num">${r.avgT}</td>
+      <td class="num" style="font-weight:900;">${r.total}</td>
+    </tr>`).join("");
+ 
+    const detailSelect = document.getElementById("detailStudentSelect");
+    const cur = detailSelect.value;
+    detailSelect.innerHTML = students.map(s=>`<option value="${s.id}">${escapeHtml(s.name)}</option>`).join("");
+    if(students.find(s=>s.id===cur)) detailSelect.value = cur;
+    detailSelect.onchange = renderDetailTable;
+    renderDetailTable();
+  }
+ 
+  function renderDetailTable(){
+    const sid = document.getElementById("detailStudentSelect").value;
+    const tbody = document.querySelector("#detailTable tbody");
+    if(!sid){ tbody.innerHTML=""; return; }
+    const now = Date.now();
+    const rows = state.assignments.map(a=>{
+      const rec = state.records.find(r=>r.assignmentId===a.id && r.studentId===sid);
+      if(!rec || typeof rec.originalScore !== "number") return null;
+      const t = timelinessScore(a, rec, state.settings, now);
+      const c = combinedScore(a, rec, state.settings, now);
+      return {title:a.title, category:a.category, orig:rec.originalScore, t: t===null?"進行中":t.toFixed(1), c: c===null?"—":c.toFixed(1), pub:a.publishedAt};
+    }).filter(Boolean).sort((x,y)=>y.pub-x.pub);
+    tbody.innerHTML = rows.length ? rows.map(r=>`<tr>
+      <td>${escapeHtml(r.title)}</td><td>${escapeHtml(r.category||"")}</td>
+      <td class="num">${r.orig}</td><td class="num">${r.t}</td><td class="num">${r.c}</td>
+    </tr>`).join("") : `<tr><td colspan="5" class="empty">還沒有這位學生的作業紀錄</td></tr>`;
+  }
+ 
+  // ---- settings ----
+  document.getElementById("saveSettingsBtn").addEventListener("click", async ()=>{
+    await loadAll();
+    state.settings.correctionDays = Number(document.getElementById("setCorrectionDays").value)||7;
+    state.settings.correctionWeight = Number(document.getElementById("setWeight").value)||0;
+    state.settings.latePenaltyPerDay = Number(document.getElementById("setLatePenalty").value)||0;
+    state.settings.maxLatePenalty = Number(document.getElementById("setMaxPenalty").value)||0;
+    state.settings.onTimePts = Number(document.getElementById("setOnTimePts").value)||0;
+    state.settings.latePts = Number(document.getElementById("setLatePts").value)||0;
+    await saveKey("settings", state.settings, true);
+    await showAlert("設定已儲存！");
+    renderTeacherAll();
+  });
+ 
+  function fillSettingsForm(){
+    document.getElementById("setCorrectionDays").value = state.settings.correctionDays;
+    document.getElementById("setWeight").value = state.settings.correctionWeight;
+    document.getElementById("setLatePenalty").value = state.settings.latePenaltyPerDay;
+    document.getElementById("setMaxPenalty").value = state.settings.maxLatePenalty;
+    document.getElementById("setOnTimePts").value = state.settings.onTimePts;
+    document.getElementById("setLatePts").value = state.settings.latePts;
+  }
+ 
+  // ---------- data backup: export / import ----------
+  async function buildExportPayload(){
+    await loadAll(true);
+    return {
+      exportedAt: Date.now(),
+      roster: state.roster,
+      assignments: state.assignments,
+      records: state.records,
+      settings: state.settings
+    };
+  }
+ 
+  document.getElementById("exportDataBtn").addEventListener("click", async ()=>{
+    const payload = await buildExportPayload();
+    const text = JSON.stringify(payload, null, 2);
+    const textarea = document.getElementById("exportTextarea");
+    textarea.value = text;
+    // best-effort automatic download; if the browser/environment blocks it, the text above still works
+    try{
+      const blob = new Blob([text], {type:"application/json"});
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "homework-monster-backup-" + tsToDateStr(Date.now()) + ".json";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(()=>URL.revokeObjectURL(url), 2000);
+    }catch(e){
+      console.error("auto-download failed, use the text box instead", e);
+    }
+  });
+ 
+  document.getElementById("copyExportBtn").addEventListener("click", async ()=>{
+    const textarea = document.getElementById("exportTextarea");
+    if(!textarea.value){
+      const payload = await buildExportPayload();
+      textarea.value = JSON.stringify(payload, null, 2);
+    }
+    textarea.focus();
+    textarea.select();
+    try{
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        await navigator.clipboard.writeText(textarea.value);
+      } else {
+        document.execCommand("copy");
+      }
+      await showAlert("已複製備份內容！可以貼到記事本或訊息裡保存。");
+    }catch(e){
+      await showAlert("自動複製失敗，內容已經選取，請手動按 Ctrl+C / Cmd+C 複製。");
+    }
+  });
+ 
+  async function applyImportedData(rawText){
+    let data;
+    try{
+      data = JSON.parse(rawText);
+    }catch(e){
+      await showAlert("匯入失敗：內容不是有效的 JSON，請確認完整貼上備份內容。");
+      return;
+    }
+    if(!data || !data.roster || !Array.isArray(data.assignments) || !Array.isArray(data.records)){
+      await showAlert("匯入失敗，請確認這是本系統匯出的備份內容。");
+      return;
+    }
+    if(!(await showConfirm("匯入將會覆蓋目前所有資料（學生、作業、成績、設定），確定要匯入嗎？"))) return;
+    state.roster = data.roster;
+    state.assignments = data.assignments;
+    state.records = data.records;
+    state.settings = Object.assign({}, DEFAULT_SETTINGS, data.settings||{});
+    await saveKey("roster", state.roster, true);
+    await saveKey("assignments", state.assignments, true);
+    await saveKey("records", state.records, true);
+    await saveKey("settings", state.settings, true);
+    selectedAssignCategory = null;
+    await showAlert("匯入完成！");
+    refreshStudentViews(); renderTeacherAll();
+  }
+ 
+  document.getElementById("importFileInput").addEventListener("change", (evt)=>{
+    const file = evt.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = async (ev)=>{
+      await applyImportedData(ev.target.result);
+      evt.target.value = "";
+    };
+    reader.onerror = async ()=>{
+      await showAlert("讀取檔案失敗，請改用下面的文字貼上方式匯入。");
+      evt.target.value = "";
+    };
+    reader.readAsText(file);
+  });
+ 
+  document.getElementById("importTextBtn").addEventListener("click", async ()=>{
+    const text = document.getElementById("importTextarea").value.trim();
+    if(!text){ await showAlert("請先把備份內容貼在文字框裡。"); return; }
+    await applyImportedData(text);
+  });
+ 
+  // ---------- init ----------
+  (async function init(){
+    await loadAll(true);
+    fillSettingsForm();
+    showGridState();
+    renderTeacherAll();
+  })();
+ 
+})();
+</script>
+</body>
+</html>
 # -
 作業清點系統
